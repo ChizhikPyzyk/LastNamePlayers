@@ -102,7 +102,7 @@ void Open_MainMenu(int iClient)
 	SetMenuTitle(hMenu, "Last Player Name | Главная");
 
 	AddMenuItem(hMenu, "", "Список игроков");
-	AddMenuItem(hMenu, "", "В разработке(не трогать)");
+	AddMenuItem(hMenu, "", "В разработке");
 	AddMenuItem(hMenu, "", "В разработке(не трогать)");
 
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
