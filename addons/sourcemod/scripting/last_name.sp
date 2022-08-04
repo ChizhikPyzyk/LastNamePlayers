@@ -6,7 +6,7 @@
 
 #define PLUGIN_NAME "LastNamePlayers"
 #define PLUGIN_AUTHOR "phenom"
-#define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_VERSION "1.1.0"
 #define PLUGIN_URL "https://vk.com/jquerry"
 
 Database g_hDatabase;
@@ -74,7 +74,7 @@ public void OnClientPostAdminCheck(int iClient)
 
 		if(query.FetchRow())
 		{
-			FormatEx(buffer, sizeof(buffer), "UPDATE `u24182_rush_sourcebans`.`last_name` SET `time` = '%i' WHERE `last_name`.`auth` = '%s'", GetTime(), szClientAuth);
+			FormatEx(buffer, sizeof(buffer), "UPDATE `u24182_rush_sourcebans`.`last_name` SET `time` = '%i', `auth` = '%s' WHERE `last_name`.`nick` = '%s'", GetTime(), szClientAuth, szName);
 			g_hDatabase.Query(SQL_Callback_CheckError, buffer);
 		}
 		else
@@ -100,9 +100,6 @@ void Open_MainMenu(int iClient)
 
 	Handle hMenu = CreateMenu(CallBack_MainMenu);
 	SetMenuTitle(hMenu, "Last Player Name | Главная");
-
-	AddMenuItem(hMenu, "", "Список игроков");
-	AddMenuItem(hMenu, "", "В разработке");
 	AddMenuItem(hMenu, "", "В разработке(не трогать)");
 
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -128,10 +125,6 @@ int CallBack_MainMenu(Menu hMenu, MenuAction eAction, int iClient, int iItem)
 				{
 					
 				}
-				case 2:
-				{
-					
-				}
 			}
 		}
 	}
@@ -149,7 +142,7 @@ void LPN_Players(int iClient)
 
 	for (int i = 1; i < MaxClients; i++)
 	{
-		if (IsClientConnected(i))
+		if (IsClientConnected(i) && !IsClientSourceTV(i))
 		{
 			GetClientName(i, szPlayerName, 64);
 			IntToString(i, szClient, 8);
@@ -188,35 +181,34 @@ void LPN_ListPlayers(int iClient, int iTarget)
 	char szClientAuth[34], buffer2[512], buffer[512], szPlayerName[MAX_NAME_LENGTH], date[32];
 	int iTimePlayer;
 	GetClientAuthId(iTarget, AuthId_Steam2, szClientAuth, sizeof(szClientAuth));
-	Format(buffer2, sizeof(buffer2), "SELECT * FROM `last_name` WHERE `auth` LIKE '%s' ORDER BY `time` DESC LIMIT 0,10", szClientAuth);
+	Format(buffer2, sizeof(buffer2), "SELECT * FROM `last_name` WHERE `auth` LIKE '%s'", szClientAuth);
 	DBResultSet query = SQL_Query(g_hDatabase, buffer2);
 
-	Panel panel = new Panel();
-	panel.SetTitle("Last Player Name | Информация");
+	Handle hMenu = CreateMenu(Select_Panel);
+	SetMenuTitle(hMenu, "Last Player Name | Информация");
 
-	int i = 1;
 	while (SQL_FetchRow(query))
 	{
 		query.FetchString(2, szPlayerName, sizeof(szPlayerName));
 		iTimePlayer = query.FetchInt(3);
 
 		FormatTime(date, sizeof(date), "%d/%m/%Y", iTimePlayer);
-		FormatEx(buffer, sizeof(buffer), "%i. %s - %s", i, szPlayerName, date);
-		i++;
-		panel.DrawText(buffer);
+		FormatEx(buffer, sizeof(buffer), "%s - %s", szPlayerName, date);
+		AddMenuItem(hMenu, "", buffer);
 	}
 
-	SetPanelCurrentKey(panel, 8);
-	DrawPanelItem(panel, "Назад");
-	SetPanelCurrentKey(panel, 0);
-	DrawPanelItem(panel, "Выход");
-	panel.Send(iClient, Select_Panel, 20);
+	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
-public int Select_Panel(Handle panel, MenuAction eAction, int iClient, int iItem) 
+int Select_Panel(Menu hMenu, MenuAction eAction, int iClient, int iItem)
 {
-    if(eAction == MenuAction_Select && iItem == 8)
+	switch(eAction)
 	{
-		Open_MainMenu(iClient);
+		case MenuAction_End:
+		{
+			CloseHandle(hMenu);
+		}
 	}
+
+	return 0;
 }
