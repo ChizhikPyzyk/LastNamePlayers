@@ -74,12 +74,12 @@ public void OnClientPostAdminCheck(int iClient)
 
 		if(query.FetchRow())
 		{
-			FormatEx(buffer, sizeof(buffer), "UPDATE `u24182_rush_sourcebans`.`last_name` SET `time` = '%i', `auth` = '%s' WHERE `last_name`.`nick` = '%s'", GetTime(), szClientAuth, szName);
+			FormatEx(buffer, sizeof(buffer), "UPDATE `last_name` SET `time` = '%i', `auth` = '%s' WHERE `last_name`.`nick` = '%s'", GetTime(), szClientAuth, szName);
 			g_hDatabase.Query(SQL_Callback_CheckError, buffer);
 		}
 		else
 		{
-			FormatEx(buffer, sizeof(buffer), "INSERT INTO `u24182_rush_sourcebans`.`last_name` (`id`, `auth`, `nick`, `time`) VALUES (NULL, '%s', '%s', '%i');", szClientAuth, szName, GetTime());
+			FormatEx(buffer, sizeof(buffer), "INSERT INTO `last_name` (`id`, `auth`, `nick`, `time`) VALUES (NULL, '%s', '%s', '%i');", szClientAuth, szName, GetTime());
 			g_hDatabase.Query(SQL_Callback_CheckError, buffer);
 		}
     }
