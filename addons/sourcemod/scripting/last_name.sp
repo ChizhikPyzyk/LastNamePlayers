@@ -6,7 +6,7 @@
 
 #define PLUGIN_NAME "LastNamePlayers"
 #define PLUGIN_AUTHOR "phenom"
-#define PLUGIN_VERSION "1.1.0"
+#define PLUGIN_VERSION "1.2.0"
 #define PLUGIN_URL "https://vk.com/jquerry"
 
 Database g_hDatabase;
@@ -69,10 +69,10 @@ public void OnClientPostAdminCheck(int iClient)
 
     if(IsClientConnected(iClient) && !IsClientSourceTV(iClient))
     {
-		Format(buffer2, sizeof(buffer2), "SELECT * FROM `last_name` WHERE `nick` LIKE '%s' ORDER BY `time` DESC LIMIT 0,10", szName);
+		Format(buffer2, sizeof(buffer2), "SELECT id, auth, nick, time FROM `last_name` WHERE `nick` LIKE '%s' ORDER BY `time` DESC LIMIT 0,10", szName);
 		DBResultSet query = SQL_Query(g_hDatabase, buffer2);
 
-		if(query.FetchRow())
+		if(SQL_FetchRow(query))
 		{
 			FormatEx(buffer, sizeof(buffer), "UPDATE `last_name` SET `time` = '%i', `auth` = '%s' WHERE `last_name`.`nick` = '%s'", GetTime(), szClientAuth, szName);
 			g_hDatabase.Query(SQL_Callback_CheckError, buffer);
@@ -98,7 +98,7 @@ Action LPN_Info(int iClient, int iArgs)
 void Open_MainMenu(int iClient)
 {
 
-	Handle hMenu = CreateMenu(CallBack_MainMenu);
+	Handle hMenu = CreateMenu(CallBack_MainMenu, MenuAction_Cancel);
 	SetMenuTitle(hMenu, "Last Player Name | Главная");
 	AddMenuItem(hMenu, "", "Список игроков");
 
@@ -137,7 +137,7 @@ void LPN_Players(int iClient)
 	char szPlayerName[MAX_NAME_LENGTH],
 		 szClient[8];
 
-	Handle hMenu = CreateMenu(CallBack_PlayerMenu);
+	Handle hMenu = CreateMenu(CallBack_PlayerMenu, MenuAction_Cancel);
 	SetMenuTitle(hMenu, "Last Player Name | Игроки");
 
 	for (int i = 1; i < MaxClients; i++)
@@ -160,6 +160,13 @@ int CallBack_PlayerMenu(Menu hMenu, MenuAction eAction, int iClient, int iItem)
 		case MenuAction_End:
 		{
 			CloseHandle(hMenu);
+		}
+		case MenuAction_Cancel:
+		{
+			if(iItem == MenuCancel_ExitBack)    // Если игрок нажал кнопку "Назад"
+            {
+                Open_MainMenu(iClient);
+            }
 		}
 		case MenuAction_Select:
 		{
@@ -184,7 +191,7 @@ void LPN_ListPlayers(int iClient, int iTarget)
 	Format(buffer2, sizeof(buffer2), "SELECT * FROM `last_name` WHERE `auth` LIKE '%s'", szClientAuth);
 	DBResultSet query = SQL_Query(g_hDatabase, buffer2);
 
-	Handle hMenu = CreateMenu(Select_Panel);
+	Handle hMenu = CreateMenu(Select_Panel, MenuAction_Cancel);
 	SetMenuTitle(hMenu, "Last Player Name | Информация");
 
 	while (SQL_FetchRow(query))
@@ -207,6 +214,14 @@ int Select_Panel(Menu hMenu, MenuAction eAction, int iClient, int iItem)
 		case MenuAction_End:
 		{
 			CloseHandle(hMenu);
+		}
+		case MenuAction_Cancel:
+		{
+			if(iItem == MenuCancel_ExitBack)    // Если игрок нажал кнопку "Назад"
+            {
+                Open_MainMenu(iClient);
+            }
+
 		}
 	}
 
