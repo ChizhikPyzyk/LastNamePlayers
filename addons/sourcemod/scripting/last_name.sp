@@ -6,7 +6,7 @@
 
 #define PLUGIN_NAME "LastNamePlayers"
 #define PLUGIN_AUTHOR "phenom"
-#define PLUGIN_VERSION "1.2.0"
+#define PLUGIN_VERSION "1.3.0"
 #define PLUGIN_URL "https://vk.com/jquerry"
 
 Database g_hDatabase;
@@ -163,7 +163,7 @@ int CallBack_PlayerMenu(Menu hMenu, MenuAction eAction, int iClient, int iItem)
 		}
 		case MenuAction_Cancel:
 		{
-			if(iItem == MenuCancel_ExitBack)    // Если игрок нажал кнопку "Назад"
+			if(iItem == MenuCancel_ExitBack)
             {
                 Open_MainMenu(iClient);
             }
@@ -204,6 +204,7 @@ void LPN_ListPlayers(int iClient, int iTarget)
 		AddMenuItem(hMenu, "", buffer);
 	}
 
+	SetMenuExitBackButton(hMenu, true);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -217,9 +218,9 @@ int Select_Panel(Menu hMenu, MenuAction eAction, int iClient, int iItem)
 		}
 		case MenuAction_Cancel:
 		{
-			if(iItem == MenuCancel_ExitBack)    // Если игрок нажал кнопку "Назад"
+			if(iItem == MenuCancel_ExitBack)
             {
-                Open_MainMenu(iClient);
+                LPN_Players(iClient);
             }
 
 		}
