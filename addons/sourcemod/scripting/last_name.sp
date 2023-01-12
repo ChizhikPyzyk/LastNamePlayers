@@ -6,7 +6,7 @@
 
 #define PLUGIN_NAME "LastNamePlayers"
 #define PLUGIN_AUTHOR "phenom"
-#define PLUGIN_VERSION "1.3.0"
+#define PLUGIN_VERSION "1.3.1"
 #define PLUGIN_URL "https://vk.com/jquerry"
 
 Database g_hDatabase;
@@ -67,12 +67,12 @@ public void OnClientPostAdminCheck(int iClient)
     GetClientAuthId(iClient, AuthId_Steam2, szClientAuth, sizeof(szClientAuth));
     GetClientName(iClient, szName, sizeof(szName));
 
-    if(IsClientConnected(iClient) && !IsClientSourceTV(iClient))
+    if(IsClientConnected(iClient) && !IsClientSourceTV(iClient) && !IsFakeClient(iClient))
     {
 		Format(buffer2, sizeof(buffer2), "SELECT id, auth, nick, time FROM `last_name` WHERE `nick` LIKE '%s' ORDER BY `time` DESC LIMIT 0,10", szName);
 		DBResultSet query = SQL_Query(g_hDatabase, buffer2);
 
-		if(SQL_FetchRow(query))
+		if(query != INVALID_HANDLE && SQL_FetchRow(query))
 		{
 			FormatEx(buffer, sizeof(buffer), "UPDATE `last_name` SET `time` = '%i', `auth` = '%s' WHERE `last_name`.`nick` = '%s'", GetTime(), szClientAuth, szName);
 			g_hDatabase.Query(SQL_Callback_CheckError, buffer);
