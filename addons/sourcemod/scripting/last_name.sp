@@ -72,7 +72,7 @@ public void OnClientPostAdminCheck(int iClient)
 		Format(buffer2, sizeof(buffer2), "SELECT id, auth, nick, time FROM `last_name` WHERE `nick` LIKE '%s' ORDER BY `time` DESC LIMIT 0,10", szName);
 		DBResultSet query = SQL_Query(g_hDatabase, buffer2);
 
-		if(query != INVALID_HANDLE)
+		if(query != INVALID_HANDLE && SQL_FetchRow(query))
 		{
 			FormatEx(buffer, sizeof(buffer), "UPDATE `last_name` SET `time` = '%i', `auth` = '%s' WHERE `last_name`.`nick` = '%s'", GetTime(), szClientAuth, szName);
 			g_hDatabase.Query(SQL_Callback_CheckError, buffer);
