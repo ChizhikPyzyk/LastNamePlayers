@@ -42,7 +42,7 @@ public void OnSqlConnect(Database hDatabase, const char[] sError, any data)
 	g_hDatabase = hDatabase; 
 	
 	SQL_LockDatabase(g_hDatabase); 
-	g_hDatabase.Query(SQL_Callback_CheckError, "CREATE TABLE last_name (\
+	g_hDatabase.Query(SQL_Callback_CheckError, "CREATE TABLE IF NOT EXISTS last_name (\
 													`id` int(11) NOT NULL ,\  
 													auth CHAR(34) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,\  
 													nick CHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,\   
