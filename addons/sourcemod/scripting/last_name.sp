@@ -67,7 +67,7 @@ public void OnClientPostAdminCheck(int iClient)
     GetClientAuthId(iClient, AuthId_Steam2, szClientAuth, sizeof(szClientAuth));
     GetClientName(iClient, szName, sizeof(szName));
 
-    if(IsClientConnected(iClient) && !IsClientSourceTV(iClient))
+    if(IsClientConnected(iClient) && !IsClientSourceTV(iClient) && !IsFakeClient(iClient))
     {
 		Format(buffer2, sizeof(buffer2), "SELECT id, auth, nick, time FROM `last_name` WHERE `nick` LIKE '%s' ORDER BY `time` DESC LIMIT 0,10", szName);
 		DBResultSet query = SQL_Query(g_hDatabase, buffer2);
