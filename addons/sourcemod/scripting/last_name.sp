@@ -6,7 +6,7 @@
 
 #define PLUGIN_NAME "LastNamePlayers"
 #define PLUGIN_AUTHOR "phenom"
-#define PLUGIN_VERSION "1.3.1"
+#define PLUGIN_VERSION "1.3.2"
 #define PLUGIN_URL "https://vk.com/jquerry"
 
 Database g_hDatabase;
@@ -53,19 +53,12 @@ public void OnSqlConnect(Database hDatabase, const char[] sError, any data)
 
 }
 
-public void SQL_Callback_CheckError(Database hDatabase, DBResultSet results, const char[] szError, any data)
-{
-	if(szError[0])
-	{
-		LogError("SQL_Callback_CheckError: %s", szError);
-	}
-}
-
 public void OnClientPostAdminCheck(int iClient)
 {
 	char szClientAuth[34], szName[MAX_NAME_LENGTH], buffer2[512], buffer[512];
     GetClientAuthId(iClient, AuthId_Steam2, szClientAuth, sizeof(szClientAuth));
     GetClientName(iClient, szName, sizeof(szName));
+	ReplaceString(szName, sizeof(szName), "'", "");
 
     if(IsClientConnected(iClient) && !IsClientSourceTV(iClient) && !IsFakeClient(iClient))
     {
@@ -83,6 +76,20 @@ public void OnClientPostAdminCheck(int iClient)
 			g_hDatabase.Query(SQL_Callback_CheckError, buffer);
 		}
     }
+}
+
+public void OnClientDisconnect(int iClient)
+{
+	char szClientAuth[34], szName[MAX_NAME_LENGTH], buffer[512];
+    GetClientAuthId(iClient, AuthId_Steam2, szClientAuth, sizeof(szClientAuth));
+    GetClientName(iClient, szName, sizeof(szName));
+	ReplaceString(szName, sizeof(szName), "'", "");
+
+	if(!IsClientSourceTV(iClient) && !IsFakeClient(iClient))
+	{
+		FormatEx(buffer, sizeof(buffer), "UPDATE `last_name` SET `time` = '%i', `auth` = '%s' WHERE `last_name`.`nick` = '%s'", GetTime(), szClientAuth, szName);
+		g_hDatabase.Query(SQL_Callback_CheckError, buffer);
+	}
 }
 
 Action LPN_Info(int iClient, int iArgs)
@@ -188,7 +195,7 @@ void LPN_ListPlayers(int iClient, int iTarget)
 	char szClientAuth[34], buffer2[512], buffer[512], szPlayerName[MAX_NAME_LENGTH], date[32];
 	int iTimePlayer;
 	GetClientAuthId(iTarget, AuthId_Steam2, szClientAuth, sizeof(szClientAuth));
-	Format(buffer2, sizeof(buffer2), "SELECT * FROM `last_name` WHERE `auth` LIKE '%s'", szClientAuth);
+	Format(buffer2, sizeof(buffer2), "SELECT id, auth, nick, time FROM `last_name` WHERE `auth` LIKE '%s'", szClientAuth);
 	DBResultSet query = SQL_Query(g_hDatabase, buffer2);
 
 	Handle hMenu = CreateMenu(Select_Panel, MenuAction_Cancel);
@@ -227,4 +234,12 @@ int Select_Panel(Menu hMenu, MenuAction eAction, int iClient, int iItem)
 	}
 
 	return 0;
+}
+
+public void SQL_Callback_CheckError(Database hDatabase, DBResultSet results, const char[] szError, any data)
+{
+	if(szError[0])
+	{
+		LogError("SQL_Callback_CheckError: %s", szError);
+	}
 }
